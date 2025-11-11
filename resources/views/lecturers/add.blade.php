@@ -9,6 +9,7 @@
                 <h4 class="modal-title"><b>Thêm Giảng Viên</b></h4>
             </div>
             <form method="post" action="{{route('lecturer.addlecturer')}}" id="frm_add_lucturer">
+            {{ csrf_field() }}
             <div class="col-md-12">
                 <div class="widget-body">
                         <div class="row">

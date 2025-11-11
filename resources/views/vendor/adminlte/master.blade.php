@@ -16,6 +16,8 @@
     <!-- Ionicons -->
     <link rel="stylesheet" href="{{ asset('vendor/adminlte/vendor/Ionicons/css/ionicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <!-- Toastr notifications -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKM2658GqZlP0sS1Uu2qRrZ6Yf6wqf2WlSUf7V+GhM9m7Nf5pO1C3uGZ2wYgQz9r4J9l2oQW8qK2QxYB6v9gXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     @if(config('adminlte.plugins.select2'))
         <!-- Select2 -->
@@ -46,6 +48,8 @@
 
 <script src="{{ asset('vendor/adminlte/vendor/jquery/dist/jquery.min.js') }}"></script>
 <script src="{{ asset('vendor/adminlte/vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+<!-- Toastr notifications -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-3z9VHtV6nYkqTn9JwCq3n1xgV4T1wz1f0lD8J2i0QmV8W3tVhOqg8kG2oTtMZs8dQeJPzWc9fV3KkZ8r3r7S3g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 @if(config('adminlte.plugins.select2'))
     <!-- Select2 -->

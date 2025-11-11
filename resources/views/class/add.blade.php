@@ -9,6 +9,7 @@
                 <h4 class="modal-title"><b>Thêm Lớp</b></h4>
             </div>
             <form method="post" data-duplicate="{{route('class.postDuplicate')}}" action="{{route('class.addclass')}}" id="frm_add_class">
+            {{ csrf_field() }}
             <div class="col-md-12">
                 <div class="widget-body">
                         <div class="row">

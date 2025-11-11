@@ -3,7 +3,7 @@
 @section('content_header')
     <div class="row">
         {{--{!! Form:: !!}--}}
-        <form method="post" id="search-form">
+    <form method="get" id="search-form">
             <div class="col-md-8">
                 <div class="btn btn-flat fix-box" style="margin: 0;padding: 0 0 0 12px;">
                     <select name="type-search" id="type_search" class="form-control">
@@ -48,7 +48,7 @@
         {{--<a href="{{route('subject.getDestroy')}}">Xóa</a>--}}
     </div>
     @endcan
-    <table class="table table-bordered table-striped" id="custom-table">
+    <table class="table table-bordered table-striped" id="custom-table" data-url="{{ route('lecturer.data_json') }}">
         <thead>
         <tr>
             <th>STT</th>
@@ -64,6 +64,7 @@
         </tr>
         </thead>
     </table>
+    <input type="hidden" id="js-is-admin" value="{{ auth()->check() && auth()->user()->can('admin') ? 1 : 0 }}">
     @can('admin')
     @include('lecturers.add')
     @include('lecturers.edit')
@@ -73,26 +74,24 @@
     <!-- List user JS -->
     <script src="{{ asset('js/lecturer.js')}}"></script>
     <script>
-        var url="{{route('lecturer.data_json')}}";
+    var url = document.getElementById('custom-table').getAttribute('data-url');
+    var adminEl = document.getElementById('js-is-admin');
+    var isAdmin = !!adminEl && adminEl.value === '1';
         $(function() {
             datatable = $('#custom-table').DataTable({
 //                processing: true,
                 serverSide: true,
                 autoWidth: false,
                 searching: false,
-                columnDefs: [
-                    {
-                        "targets": 0,
-                        "className": "text-center",
-                        'width':'5%'
-                    },
-                    @can('admin')
-                    {
-                        "targets": 7,
-                        "className": "text-center",
+                columnDefs: (function(){
+                    var defs = [
+                        { targets: 0, className: 'text-center', width: '5%' }
+                    ];
+                    if (isAdmin) {
+                        defs.push({ targets: 7, className: 'text-center' });
                     }
-                    @endcan
-                    ],
+                    return defs;
+                })(),
 
 //            stateSave: true,
                 ajax: {
@@ -106,22 +105,21 @@
 //                        };
                     }
                 },
-                columns: [
-                    {data: 'rownum', name: 'rownum'},
-                    {data: 'magv', name: 'magv'},
-                    {data: 'hotengv', name: 'hotengv'},
-                    {data: 'ngaysinh', name: 'ngaysinh'},
-                    {data: 'gioitinhgv', name: 'gioitinhgv'},
-                    {data: 'hocham', name: 'hocham'},
-                    {data: 'hocvi', name: 'hocvi'},
-                    @can('admin')
-                    {data: 'action', name: 'action'},
-                    @endcan
-
-
-
-
-                ],
+                columns: (function(){
+                    var cols = [
+                        {data: 'rownum', name: 'rownum'},
+                        {data: 'magv', name: 'magv'},
+                        {data: 'hotengv', name: 'hotengv'},
+                        {data: 'ngaysinh', name: 'ngaysinh'},
+                        {data: 'gioitinhgv', name: 'gioitinhgv'},
+                        {data: 'hocham', name: 'hocham'},
+                        {data: 'hocvi', name: 'hocvi'}
+                    ];
+                    if (isAdmin) {
+                        cols.push({data: 'action', name: 'action'});
+                    }
+                    return cols;
+                })(),
                 language: {
                     "lengthMenu": "Hiển thị _MENU_ bản ghi",
                     "zeroRecords": "Không có bản ghi nào được tìm thấy",

@@ -1,4 +1,10 @@
 $(function () {
+    // Ensure all AJAX requests include the CSRF token
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     $("#add_monhoc").select2({
         placeholder: "--Chọn môn học--",
         multiple: true,
@@ -23,46 +29,41 @@ $(function () {
         e.preventDefault();
         $('#frm_add_student').submit();
     });
-    $('#frm_add_student').validate({
-        errorClass: 'error-msg-validate',
-        rules: {
-            add_hosv: {
-                required: true,
-            },
-            add_tensv: {
-                required: true,
-            },
-            add_gioitinh: {
-                required: true,
-            },
-            add_ngaysinh: {
-                required: true,
-            },
-            add_monhoc: {
-                required: true,
-            },
-            add_quequan: {
-                required: true,
-            },
-        }
-    });
+    if ($.fn.validate) {
+        $('#frm_add_student').validate({
+            errorClass: 'error-msg-validate',
+            rules: {
+                add_hosv: { required: true },
+                add_tensv: { required: true },
+                add_gioitinh: { required: true },
+                add_ngaysinh: { required: true },
+                add_quequan: { required: true },
+            }
+        });
+    }
     $("#frm_add_student").on('submit', function (e) {
-        if ($(this).valid()) {
+        e.preventDefault();
+        var isValid = (typeof $(this).valid === 'function') ? $(this).valid() : true;
+        if (isValid) {
             var data = $(this).serializeArray();
             var url = $(this).attr('action');
             $.post(url, data, function (resp) {
                 if (resp.error == 1) {
-                    toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
-                    datatable.ajax.reload();
-                    $('#add_student').modal('hide');
+                    if (window.toastr) toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
                 } else {
-                    toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
-                    datatable.ajax.reload();
-                    $('#add_student').modal('hide');
+                    if (window.toastr) toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
                 }
-            }, 'json');
-            return false;
+                try { datatable.ajax.reload(); } catch (e) {}
+                // Always hide modal after processing response
+                $('#add_student').modal('hide');
+            }, 'json')
+            .fail(function (xhr) {
+                var msg = 'Có lỗi xảy ra';
+                if (xhr.status === 419) msg = 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang.';
+                if (window.toastr) toastr.error(msg, 'Lỗi!', {closeButton: true});
+            });
         }
+        return false;
     });
     /**
      * Edit form
@@ -71,43 +72,41 @@ $(function () {
         e.preventDefault();
         $('#frm_edit_student').submit();
     })
-    $('#frm_edit_student').validate({
-        errorClass: 'error-msg-validate',
-        rules: {
-            edit_hosv: {
-                required: true,
-            },
-            edit_tensv: {
-                required: true,
-            },
-            edit_gioitinh: {
-                required: true,
-            },
-            edit_ngaysinh: {
-                required: true,
-            },
-            edit_quequan: {
-                required: true,
-            },
-        }
-    });
+    if ($.fn.validate) {
+        $('#frm_edit_student').validate({
+            errorClass: 'error-msg-validate',
+            rules: {
+                edit_hosv: { required: true },
+                edit_tensv: { required: true },
+                edit_gioitinh: { required: true },
+                edit_ngaysinh: { required: true },
+                edit_quequan: { required: true },
+            }
+        });
+    }
     $("#frm_edit_student").on('submit', function (e) {
-        if ($(this).valid()) {
+        e.preventDefault();
+        var isValid = (typeof $(this).valid === 'function') ? $(this).valid() : true;
+        if (isValid) {
             var data = $(this).serializeArray();
             var url = $(this).attr('action');
             $.post(url, data, function (resp) {
                 if (resp.error == 1) {
-                    toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
+                    if (window.toastr) toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
                 } else {
-                    toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
-                    datatable.ajax.reload();
-                    $('#edit_student').modal('hide');
-                    // $('#edit_name').val('');
-                    // $('#edit_email').val('');
-                    // $('#edit_level').select2('val', 'All');
+                    if (window.toastr) toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
                 }
-            }, 'json');
-            return false;
+                // Reload table regardless of success to reflect current state
+                try { datatable.ajax.reload(); } catch (e) {}
+                // Always hide modal after processing response
+                $('#edit_student').modal('hide');
+            }, 'json')
+            .fail(function (xhr) {
+                var msg = 'Có lỗi xảy ra';
+                if (xhr.status === 419) msg = 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang.';
+                if (window.toastr) toastr.error(msg, 'Lỗi!', {closeButton: true});
+            });
         }
+        return false;
     });
 });

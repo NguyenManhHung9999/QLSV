@@ -9,6 +9,7 @@
                 <h4 class="modal-title"><b>Thêm Sinh Viên</b></h4>
             </div>
             <form method="post" action="{{route('student.addstudent')}}" id="frm_add_student">
+            {{ csrf_field() }}
             <div class="col-md-12">
                 <div class="widget-body">
                         <div class="row">

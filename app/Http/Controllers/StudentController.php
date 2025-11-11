@@ -146,6 +146,9 @@ class StudentController extends Controller
     public function getexport(Request $request){
         $lop="";
         die($request);
+        // The following code is unreachable due to die($request);
+        // Remove or comment out unreachable code to fix the error.
+        /*
         DB::statement(DB::raw('set @rownum=0'));
         $student=DB::table('sinhviens')->join('lops','sinhviens.lop_id','=','lops.id')->select([
             DB::raw('@rownum  := @rownum  + 1 AS rownum'),
@@ -164,6 +167,7 @@ class StudentController extends Controller
                 $sheet->loadView('student.excel.export',['student'=>$student]);
             });
         })->export('xlsx');
+        */
     }
     public function postEdit(Request $request,$id){
         $model = Sinhvien::find($id);

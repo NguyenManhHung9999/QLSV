@@ -9,6 +9,7 @@
                 <h4 class="modal-title"><b>Sửa Sinh Viên</b></h4>
             </div>
             <form method="post" action="" id="frm_edit_student">
+                {{ csrf_field() }}
                 <div class="col-md-12">
                     <div class="widget-body">
                         <div class="row">

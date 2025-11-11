@@ -1,4 +1,10 @@
     $(function () {
+    // Ensure all AJAX requests include the CSRF token
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     $("#khoa_id").select2({
         placeholder: "--Chọn Khoa--",
         allowClear: true,
@@ -21,6 +27,7 @@
         e.preventDefault();
         $('#frm_add_class').submit();
     });
+    if ($.fn.validate) {
     $('#frm_add_class').validate({
         errorClass: 'error-msg-validate',
         rules: {
@@ -39,27 +46,35 @@
             tenlop: {
                 required: true,
             },
-            khoa_di: {
+            khoa_id: {
                 required: true,
             }
         }
     });
+    }
     $("#frm_add_class").on('submit', function (e) {
-        if ($(this).valid()) {
+        e.preventDefault();
+        var isValid = (typeof $(this).valid === 'function') ? $(this).valid() : true;
+        if (isValid) {
             var data = $(this).serializeArray();
             var url = $(this).attr('action');
             $.post(url, data, function (resp) {
                 if (resp.error == 1) {
-                    toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
+                    if (window.toastr) toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
                 } else {
-                    toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
-                    datatable.ajax.reload();
-                    $('#add_class').modal('hide');
-                    $('#malop').val('');
-                    $('#tenlop').val('');
-                    $('#khoa_id').val('');
+                    if (window.toastr) toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
                 }
-            }, 'json');
+                try { datatable.ajax.reload(); } catch (e) {}
+                $('#add_class').modal('hide');
+                $('#malop').val('');
+                $('#tenlop').val('');
+                $('#khoa_id').val('');
+            }, 'json')
+            .fail(function (xhr) {
+                var msg = 'Có lỗi xảy ra';
+                if (xhr.status === 419) msg = 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang.';
+                if (window.toastr) toastr.error(msg, 'Lỗi!', {closeButton: true});
+            });
             return false;
         }
     });
@@ -70,6 +85,7 @@
         e.preventDefault();
         $('#frm_edit_class').submit();
     })
+    if ($.fn.validate) {
     $('#frm_edit_class').validate({
         errorClass: 'error-msg-validate',
         rules: {
@@ -92,27 +108,35 @@
             edit_tenlop: {
                 required: true,
             },
-            edit_khoa_di: {
+            edit_khoa_id: {
                 required: true,
             }
         }
     });
+    }
         $("#frm_edit_class").on('submit', function (e) {
-            if ($(this).valid()) {
+            e.preventDefault();
+            var isValid = (typeof $(this).valid === 'function') ? $(this).valid() : true;
+            if (isValid) {
                 var data = $(this).serializeArray();
                 var url = $(this).attr('action');
                 $.post(url, data, function (resp) {
                     if (resp.error == 1) {
-                        toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
+                        if (window.toastr) toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
                     } else {
-                        toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
-                        datatable.ajax.reload();
-                        $('#edit_class').modal('hide');
-                        $('#edit_malop').val('');
-                        $('#edit_tenlop').val('');
-                        $('#edit_khoa_id').val('');
+                        if (window.toastr) toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
                     }
-                }, 'json');
+                    try { datatable.ajax.reload(); } catch (e) {}
+                    $('#edit_class').modal('hide');
+                    $('#edit_malop').val('');
+                    $('#edit_tenlop').val('');
+                    $('#edit_khoa_id').val('');
+                }, 'json')
+                .fail(function (xhr) {
+                    var msg = 'Có lỗi xảy ra';
+                    if (xhr.status === 419) msg = 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang.';
+                    if (window.toastr) toastr.error(msg, 'Lỗi!', {closeButton: true});
+                });
                 return false;
             }
         });

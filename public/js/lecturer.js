@@ -1,4 +1,10 @@
 $(function () {
+    // Ensure all AJAX requests include the CSRF token
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
     $("#add_monhoc").select2({
         placeholder: "--Chọn môn học--",
         multiple: true,
@@ -28,39 +34,38 @@ $(function () {
         e.preventDefault();
         $('#frm_add_lucturer').submit();
     });
-    $('#frm_add_lucturer').validate({
-        errorClass: 'error-msg-validate',
-        rules: {
-            add_magv: {
-                required: true,
-            },
-            add_hosv: {
-                required: true,
-            },
-            add_tensv: {
-                required: true,
-            },
-            add_gioitinh: {
-                required: true,
-            },
-            add_ngaysinh: {
-                required: true,
-            },
-        }
-    });
+    if ($.fn.validate) {
+        $('#frm_add_lucturer').validate({
+            errorClass: 'error-msg-validate',
+            rules: {
+                add_magv: { required: true },
+                add_hogv: { required: true },
+                add_tengv: { required: true },
+                add_gioitinh: { required: true },
+                add_ngaysinh: { required: true },
+            }
+        });
+    }
     $("#frm_add_lucturer").on('submit', function (e) {
-        if ($(this).valid()) {
+        e.preventDefault();
+        var isValid = (typeof $(this).valid === 'function') ? $(this).valid() : true;
+        if (isValid) {
             var data = $(this).serializeArray();
             var url = $(this).attr('action');
             $.post(url, data, function (resp) {
                 if (resp.error == 1) {
-                    toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
+                    if (window.toastr) toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
                 } else {
-                    toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
-                    datatable.ajax.reload();
-                    $('#add_lecturer').modal('hide');
+                    if (window.toastr) toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
                 }
-            }, 'json');
+                try { datatable.ajax.reload(); } catch (e) {}
+                $('#add_lecturer').modal('hide');
+            }, 'json')
+            .fail(function (xhr) {
+                var msg = 'Có lỗi xảy ra';
+                if (xhr.status === 419) msg = 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang.';
+                if (window.toastr) toastr.error(msg, 'Lỗi!', {closeButton: true});
+            });
             return false;
         }
     });
@@ -72,42 +77,38 @@ $(function () {
 
         $('#frm_edit_lecturer').submit();
     })
-    $('#frm_edit_student').validate({
-        errorClass: 'error-msg-validate',
-        rules: {
-            edit_magv: {
-                required: true,
-            },
-            edit_hogv: {
-                required: true,
-            },
-            edit_tengv: {
-                required: true,
-            },
-            edit_gioitinh: {
-                required: true,
-            },
-            edit_ngaysinh: {
-                required: true,
-            },
-        }
-    });
+    if ($.fn.validate) {
+        $('#frm_edit_lecturer').validate({
+            errorClass: 'error-msg-validate',
+            rules: {
+                edit_magv: { required: true },
+                edit_hogv: { required: true },
+                edit_tengv: { required: true },
+                edit_gioitinh: { required: true },
+                edit_ngaysinh: { required: true },
+            }
+        });
+    }
     $("#frm_edit_lecturer").on('submit', function (e) {
-        if ($(this).valid()) {
+        e.preventDefault();
+        var isValid = (typeof $(this).valid === 'function') ? $(this).valid() : true;
+        if (isValid) {
             var data = $(this).serializeArray();
             var url = $(this).attr('action');
             $.post(url, data, function (resp) {
                 if (resp.error == 1) {
-                    toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
+                    if (window.toastr) toastr.error(resp.message, 'Thông Báo!', {closeButton: true});
                 } else {
-                    toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
-                    datatable.ajax.reload();
-                    $('#edit_lecturer').modal('hide');
-                    // $('#edit_name').val('');
-                    // $('#edit_email').val('');
-                    // $('#edit_level').select2('val', 'All');
+                    if (window.toastr) toastr.success(resp.message, 'Thông Báo!', {closeButton: true});
                 }
-            }, 'json');
+                try { datatable.ajax.reload(); } catch (e) {}
+                $('#edit_lecturer').modal('hide');
+            }, 'json')
+            .fail(function (xhr) {
+                var msg = 'Có lỗi xảy ra';
+                if (xhr.status === 419) msg = 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang.';
+                if (window.toastr) toastr.error(msg, 'Lỗi!', {closeButton: true});
+            });
             return false;
         }
     });

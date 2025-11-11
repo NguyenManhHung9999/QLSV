@@ -3,7 +3,7 @@
 @section('content_header')
     <div class="row">
         {{--{!! Form:: !!}--}}
-        <form method="post" id="search-form">
+    <form method="post" id="search-form">
             <div class="col-md-8">
                 <div class="btn btn-flat fix-box" style="margin: 0;padding: 0 0 0 12px;">
                     <select name="type-search" id="type_search" class="form-control">
@@ -84,7 +84,7 @@
         </div>
     </div>
     @endcan
-    <table class="table table-bordered table-striped" id="custom-table">
+    <table class="table table-bordered table-striped" id="custom-table" data-url="{{ route('student.data_json') }}">
         <thead>
         <tr>
             <th>STT</th>
@@ -100,6 +100,7 @@
         </tr>
         </thead>
     </table>
+    <input type="hidden" id="js-is-admin" value="{{ auth()->check() && auth()->user()->can('admin') ? 1 : 0 }}">
     @include('student.add')
     @include('student.edit')
 @stop
@@ -112,7 +113,9 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
     <script src="//cdn.datatables.net/buttons/1.5.0/js/buttons.html5.min.js"></script>
     <script>
-        var url="{{route('student.data_json')}}";
+        var url = document.getElementById('custom-table').getAttribute('data-url');
+        var adminEl = document.getElementById('js-is-admin');
+        var isAdmin = !!adminEl && adminEl.value === '1';
         $(function() {
             datatable = $('#custom-table').DataTable({
                 dom: 'Bfrtip',
@@ -120,19 +123,15 @@
                 serverSide: true,
                 autoWidth: true,
                 searching: false,
-                columnDefs: [
-                    {
-                        "targets": 0,
-                        "className": "text-center",
-                        'width':'5%'
-                    },
-                        @can('admin')
-                    {
-                        "targets": 7,
-                        "className": "text-center",
+                columnDefs: (function(){
+                    var defs = [
+                        { targets: 0, className: 'text-center', width: '5%' }
+                    ];
+                    if (isAdmin) {
+                        defs.push({ targets: 7, className: 'text-center' });
                     }
-                    @endcan
-                    ],
+                    return defs;
+                })(),
 //            stateSave: true,
                 ajax: {
                     url: url,
@@ -148,18 +147,21 @@
                        };
                     }
                 },
-                columns: [
-                    {data: 'rownum', name: 'rownum'},
-                    {data: 'masv', name: 'masv'},
-                    {data: 'hotensv', name: 'hotensv'},
-                    {data: 'gioitinhsv', name: 'gioitinhsv'},
-                    {data: 'ngaysinh', name: 'ngaysinh'},
-                    {data: 'quequan', name: 'quequan'},
-                    {data: 'malopsv', name: 'malopsv'},
-                    @can('admin')
-                    {data: 'action', name: 'action'}
-                    @endcan
-                ],
+                columns: (function(){
+                    var cols = [
+                        {data: 'rownum', name: 'rownum'},
+                        {data: 'masv', name: 'masv'},
+                        {data: 'hotensv', name: 'hotensv'},
+                        {data: 'gioitinhsv', name: 'gioitinhsv'},
+                        {data: 'ngaysinh', name: 'ngaysinh'},
+                        {data: 'quequan', name: 'quequan'},
+                        {data: 'malopsv', name: 'malopsv'}
+                    ];
+                    if (isAdmin) {
+                        cols.push({data: 'action', name: 'action'});
+                    }
+                    return cols;
+                })(),
                  buttons: [
                         {
                             extend: 'excel',

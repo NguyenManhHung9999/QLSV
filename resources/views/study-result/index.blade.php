@@ -36,7 +36,6 @@
 
                 </div>
             </div>
-        </form>
         <div class="col-md-4">
             <ol class="breadcrumb" style="padding: 16px 0px 0px 150px;margin: 0;background-color: transparent;border-radius: 0;">
                 <li><a href="#"><i class="fa fa-user"></i> Người sử dụng</a></li>
@@ -122,7 +121,8 @@
                     @endforeach
                     <td>@php$dhl=$diemtb/$tongstc@endphp
                         {{number_format($dhl=$diemtb/$tongstc,2)}}</td>
-                    <td @can('admin')contenteditable="true" onBlur="diemrl('{{$st->idsv}}',this)" @endcan>{{$st->diemrl}}</td>
+                    @php $editable = auth()->check() && auth()->user()->can('admin') ? 'contenteditable="true" onBlur="diemrl(\''.$st->idsv.'\',this)"' : ''; @endphp
+                    <td {!! $editable !!}>{{$st->diemrl}}</td>
                     <td>
                         @if($dhl>=8)
                             Giỏi
@@ -151,7 +151,10 @@
 @stop
 @section('js')
     <script src="{{ asset('js/studyresult.js')}}"></script>
+    <input type="hidden" id="js-is-admin" value="{{ auth()->check() && auth()->user()->can('admin') ? 1 : 0 }}">
     <script>
+        var adminEl = document.getElementById('js-is-admin');
+        var isAdmin = !!adminEl && adminEl.value === '1';
         function hocbong(svid,hb) {
             var url="{{route('scholarship.hocbong')}}";
             var hocky =$("#search_hocky").val();
@@ -173,8 +176,8 @@
                 }
             });
         };
-        @can('admin')
         function diemrl(svid,diemrl) {
+            if (!isAdmin) return; // guard: only admin can update
             var url="{{route('studyresult.diemrl')}}";
             var hocky =$("#search_hocky").val();
             $.ajax({
@@ -183,9 +186,9 @@
                 data: {svid: svid, diemrl: diemrl.innerHTML, hocky: hocky},
                 success: function(data){
                     if (data.error==0){
-                        toastr.success(data.message, 'Thông Báo!', {closeButton: true});
+                        if (window.toastr) toastr.success(data.message, 'Thông Báo!', {closeButton: true});
                     }else {
-                        toastr.error(data.message, 'Thông Báo!', {closeButton: true});
+                        if (window.toastr) toastr.error(data.message, 'Thông Báo!', {closeButton: true});
                         $(diemrl).html(" ");
                     }
 
@@ -194,7 +197,6 @@
                 }
             });
         }
-        @endcan
         function btnstudyresult() {
             var lopid =$("#search_lopid").val();
             var hocky =$("#search_hocky").val();
